@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { USER } from '../utils/types';
 
 /**
  * `on` => one way messgae handler, the main can reply but will need to use event.reply() and it is not asynchronous
@@ -11,6 +12,12 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   talk: () => {
     return ipcRenderer.invoke('data', "mathematics")
+  },
+
+  sync: async () => {
+    const response = await ipcRenderer.invoke('sync');
+    console.log("The response of this method is", response);
+    return response;
   }
 }
 

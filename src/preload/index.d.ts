@@ -1,4 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
+import {USER} from '../../utils/types';
 
 declare global {
   interface Window {
@@ -6,6 +7,7 @@ declare global {
     api: {
       hello : () => void;
       talk: () => Promise<string>;
+      sync : () => Promise<USER>;
     }
   }
 }

@@ -1,6 +1,15 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
 function App(): React.JSX.Element {
+
+  useEffect(() => {
+    const syncUser = async() => {
+      let response = await window.api.sync();
+      console.log(response);
+    }
+
+    syncUser();
+  })
 
   const [reply, getReply] = useState("No reply right now");
   const data = async() => {

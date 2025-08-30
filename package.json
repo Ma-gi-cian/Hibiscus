@@ -25,7 +25,10 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@tailwindcss/vite": "^4.1.12",
     "electron-updater": "^6.3.9",
-    "tailwindcss": "^4.1.12"
+    "pouchdb": "^9.0.0",
+    "pouchdb-find": "^9.0.0",
+    "tailwindcss": "^4.1.12",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

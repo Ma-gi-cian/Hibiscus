@@ -2,6 +2,7 @@ import {app, BrowserWindow} from 'electron';
 import {join} from 'path';
 import {electronApp, optimizer, is} from '@electron-toolkit/utils';
 import IpcHandler from '../IPCHandler';
+import DatabaseManager from '../DatabaseManager';
 
 
 class Application {
@@ -9,9 +10,11 @@ class Application {
   private static instance: Application;
   private mainWindow: BrowserWindow ;
   private ipcHandler: IpcHandler;
+  private database : DatabaseManager
 
   constructor(){
-    this.ipcHandler = new IpcHandler;
+    this.database = new DatabaseManager();
+    this.ipcHandler = new IpcHandler(this.database);
   }
 
   public getMainWindow(): BrowserWindow  {
@@ -43,9 +46,13 @@ class Application {
     } else {
       this.mainWindow.loadFile(join(__dirname, '../../renderer/index.html'))
     }
+
+    this.mainWindow.webContents.openDevTools();
   }
 
   public initialize(): void {
+
+
     app.on("ready", () => {
       this.createWindow();
     });
