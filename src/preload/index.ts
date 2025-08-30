@@ -9,10 +9,6 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  hello: () => {
-    console.log('Triggering hello from the preload')
-    ipcRenderer.send('hello')
-  },
   talk: () => {
     return ipcRenderer.invoke('data', "mathematics")
   }
