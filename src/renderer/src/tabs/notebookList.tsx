@@ -1,0 +1,71 @@
+
+import {
+  NotebookText,
+  NotepadText,
+  PlusCircle,
+  Pin,
+  ChevronRightCircleIcon,
+
+} from "lucide-react";
+
+/**
+ * First query the notebooks with parent notebook equal to null
+ * when we click any notebook that it will select it as the parent notebook
+ *     - query the notes and notebooks inside of it. The notebooks should be displayed in the notebook panel and
+ *     - the notes in the notes section.
+ *
+ * We will also be able to get back meaning render the parent notebook using a back button in the notebooks panel
+ *
+ */
+
+const NotebookList = () => {
+
+  return (
+    <div className="w-full  border-r-[0.4px] flex items-center justify-center flex-col border-gray-300 h-screen tracking-wider text-slate-800">
+
+      <div className="w-full  h-screen p-8 tracking-wider space-y-3 ">
+        <button onClick = {() => console.log("Button in Notebook list is clicked") } className={true ? ` bg-pink-100 w-full py-1 px-2 font-serif text-lg flex items-center justify-left gap-4` : `font-serif py-1 px-2 w-full text-lg flex items-center justify-left gap-4`}>
+          <NotepadText className="w-5 h-5" />
+          <span>All Notes</span>
+        </button>
+
+        <button onClick = {() => console.log("Again in the Notebook list")} className= { true ? ` bg-pink-100 py-1 px-2 justify-left w-full font-serif text-lg flex items-center justify-left gap-4` : `font-serif w-full py-1 px-2 text-lg flex items-center justify-left gap-4`}>
+          <Pin className="w-5 h-5" />
+          <span>Pinned</span>
+        </button>
+
+        <span className="font-serif text-lg flex items-center justify-between w-full gap-4">
+          <span className="flex items-center justify-center gap-4">
+            <NotebookText className="w-5 h-5" />
+            <p>Notebooks</p>
+          </span>
+          <button onClick = {() => console.log("Mathematics behind machine learning ")}>
+            <PlusCircle className = "w-4 h-4"/>
+          </button>
+        </span>
+        <ul className = "font-serif space-y-2  flex flex-col">
+
+          <form   className = { false ? `w-full border-[0.3px] border-black ` : `hidden`}>
+            <input placeholder="Notebook Name..." className = { `px-2 py-1 w-full`} />
+            <button className = "hidden" type="submit">Submit</button>
+          </form>
+          {/** when the button is clicked then we select this notebook and then get the data  */}
+          <button className = "ml-8 flex items-center justify-between">
+            <p>Mathematics</p>
+            <ChevronRightCircleIcon className = "w-4 h-4 font-extralight" />
+          </button>
+        </ul>
+      </div>
+
+      <div className="flex items-left font-mono p-4 w-full border-t-[3.2px] justify-between flex-col">
+        <p>Aditya Jha</p>
+        <p className="text-xs tracking-widest text-zinc-600">
+          {" "}
+          Synced At: {new Date(Date.now()).toTimeString().split(" ")[0]}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default NotebookList;

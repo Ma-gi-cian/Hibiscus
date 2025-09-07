@@ -1,58 +1,50 @@
-import {useState, useEffect} from 'react';
+import Editor from './tabs/editor'
+import NotebookList from './tabs/notebookList'
+import {
+  Panel,
+  PanelGroup,
+  PanelResizeHandle,
+  type ImperativePanelHandle
+} from 'react-resizable-panels'
 
-function App(): React.JSX.Element {
+import { useRef,  useState } from 'react'
 
-  useEffect(() => {
-    const syncUser = async() => {
-      let response = await window.api.sync();
-      console.log(response);
+function App(){
+
+  const sidebar = useRef<ImperativePanelHandle>(null)
+  const noteside = useRef<ImperativePanelHandle>(null)
+
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  const handleSidebarResize = (size: number | undefined) => {
+    if (size && size > 3) {
+      setSidebarCollapsed(false)
     }
-
-    syncUser();
-  })
-
-  const [reply, getReply] = useState("No reply right now");
-  const data = async() => {
-    let response = await window.api.talk();
-    console.log(response)
-    getReply(response)
   }
 
-
   return (
-    <main className = "w-full h-screen flex items-center justify-center bg-black text-white">
-      <article className = "text-purple-600 flex items-center justify-center gap-4 font-semibold">
-        <button className = "bg-white px-4 py-2 rounded-lg" onClick = { () => data()}>Check!</button>
-        <p>{reply}</p>
-      </article>
+    <main className="w-[100%] h-screen bg-[#f8f5f9] flex items-center justify-center flex-col overflow-hidden">
+      <PanelGroup className="border-t-2 border-black" direction="horizontal">
+        <Panel
+          ref={sidebar}
+          onResize={() => handleSidebarResize(sidebar.current?.getSize())}
+          maxSize={25}
+          minSize={0}
+          defaultSize={20}
+          className={true ? `min-w-[200px]` : ''}
+        >
+          <NotebookList/>
+        </Panel>
+
+        <PanelResizeHandle/>
+
+        <Panel minSize={30} defaultSize={63}>
+          <Editor/>
+        </Panel>
+      </PanelGroup>
     </main>
   )
 }
 
-export default App
-/**
- *<>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
-        </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
-        </div>
-      </div>
-      <Versions></Versions>
-    </>
- */
+
+export default App;
