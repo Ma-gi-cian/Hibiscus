@@ -1,11 +1,11 @@
-
+import { useEffect, useState } from "react";
+import {USER} from "../../../utils/types"
 import {
   NotebookText,
   NotepadText,
   PlusCircle,
   Pin,
   ChevronRightCircleIcon,
-
 } from "lucide-react";
 
 /**
@@ -20,16 +20,29 @@ import {
 
 const NotebookList = () => {
 
+  const [selectedNotebook, setSelectedNotebook] = useState<string>("")
+  const [isFormOpen, setFormOpen] = useState(false)
+  const [userData, setUserData] = useState<USER>()
+
+  useEffect(() => {
+    const fetch = async() => {
+      const response = await window.api.sync();
+      setUserData(response)
+    }
+    fetch()
+
+  }, [])
+
   return (
     <div className="w-full  border-r-[0.4px] flex items-center justify-center flex-col border-gray-300 h-screen tracking-wider text-slate-800">
 
       <div className="w-full  h-screen p-8 tracking-wider space-y-3 ">
-        <button onClick = {() => console.log("Button in Notebook list is clicked") } className={true ? ` bg-pink-100 w-full py-1 px-2 font-serif text-lg flex items-center justify-left gap-4` : `font-serif py-1 px-2 w-full text-lg flex items-center justify-left gap-4`}>
+        <button onClick = {() => setSelectedNotebook('all-notes') } className={ selectedNotebook == "all-notes" ? ` bg-pink-100 w-full py-1 px-2 font-serif text-lg flex items-center justify-left gap-4` : `font-serif py-1 px-2 w-full text-lg flex items-center justify-left gap-4`}>
           <NotepadText className="w-5 h-5" />
           <span>All Notes</span>
         </button>
 
-        <button onClick = {() => console.log("Again in the Notebook list")} className= { true ? ` bg-pink-100 py-1 px-2 justify-left w-full font-serif text-lg flex items-center justify-left gap-4` : `font-serif w-full py-1 px-2 text-lg flex items-center justify-left gap-4`}>
+        <button onClick = {() => setSelectedNotebook("pinned")} className= { selectedNotebook == "pinned" ? ` bg-pink-100 py-1 px-2 justify-left w-full font-serif text-lg flex items-center justify-left gap-4` : `font-serif w-full py-1 px-2 text-lg flex items-center justify-left gap-4`}>
           <Pin className="w-5 h-5" />
           <span>Pinned</span>
         </button>
@@ -39,13 +52,13 @@ const NotebookList = () => {
             <NotebookText className="w-5 h-5" />
             <p>Notebooks</p>
           </span>
-          <button onClick = {() => console.log("Mathematics behind machine learning ")}>
+          <button onClick = {() => setFormOpen(!isFormOpen)}>
             <PlusCircle className = "w-4 h-4"/>
           </button>
         </span>
         <ul className = "font-serif space-y-2  flex flex-col">
 
-          <form   className = { false ? `w-full border-[0.3px] border-black ` : `hidden`}>
+          <form   className = { isFormOpen ? `w-full border-[0.3px] border-black ` : `hidden`}>
             <input placeholder="Notebook Name..." className = { `px-2 py-1 w-full`} />
             <button className = "hidden" type="submit">Submit</button>
           </form>
@@ -58,10 +71,10 @@ const NotebookList = () => {
       </div>
 
       <div className="flex items-left font-mono p-4 w-full border-t-[3.2px] justify-between flex-col">
-        <p>Aditya Jha</p>
+        <p>{userData?.name}</p>
         <p className="text-xs tracking-widest text-zinc-600">
           {" "}
-          Synced At: {new Date(Date.now()).toTimeString().split(" ")[0]}
+          Synced At: {new Date(String(userData?.syncedOn)).toTimeString().split(" ")[0]}
         </p>
       </div>
     </div>

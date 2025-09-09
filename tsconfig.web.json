@@ -5,7 +5,8 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx",
     "src/preload/*.d.ts",
-    "types/**/*"
+    "types/**/*",
+    "src/utils/**/*"
   ],
   "compilerOptions": {
     "typeRoots": ["./types", "./node_modules/@types"],
