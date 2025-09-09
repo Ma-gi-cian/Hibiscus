@@ -18,6 +18,11 @@ const api = {
     const response = await ipcRenderer.invoke('sync');
     console.log("The response of this method is", response);
     return response;
+  },
+
+  addNotebook: async(name, parentNotebook) => {
+    const response = await ipcRenderer.invoke('add-notebook', {name, parentNotebook});
+    return response;
   }
 }
 

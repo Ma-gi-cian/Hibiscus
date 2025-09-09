@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { FormEventHandler, useEffect, useState } from "react";
 import {USER} from "../../../utils/types"
 import {
   NotebookText,
@@ -7,7 +7,7 @@ import {
   Pin,
   ChevronRightCircleIcon,
 } from "lucide-react";
-
+import React from "react";
 /**
  * First query the notebooks with parent notebook equal to null
  * when we click any notebook that it will select it as the parent notebook
@@ -32,6 +32,24 @@ const NotebookList = () => {
     fetch()
 
   }, [])
+
+  const addNotebook = async (name: string, parentNotebook: string | null) => {
+    const response = await window.api.addNotebook(name, parentNotebook);
+    if ( response ) {
+      console.log("Created")
+    } else {
+      console.error("Failed to create it ")
+    }
+  }
+
+  const handleNotebookFormSubmit = (e : React.FormEvent<HTMLFormElement>) => {
+    const notebookName = e.target[0].value;
+    if(notebookName != "") {
+      addNotebook(notebookName, null)
+    } else {
+      console.error("Failed to create the notebook")
+    }
+  }
 
   return (
     <div className="w-full  border-r-[0.4px] flex items-center justify-center flex-col border-gray-300 h-screen tracking-wider text-slate-800">
@@ -58,7 +76,7 @@ const NotebookList = () => {
         </span>
         <ul className = "font-serif space-y-2  flex flex-col">
 
-          <form   className = { isFormOpen ? `w-full border-[0.3px] border-black ` : `hidden`}>
+          <form   className = { isFormOpen ? `w-full border-[0.3px] border-black ` : `hidden`} onSubmit={handleNotebookFormSubmit}>
             <input placeholder="Notebook Name..." className = { `px-2 py-1 w-full`} />
             <button className = "hidden" type="submit">Submit</button>
           </form>

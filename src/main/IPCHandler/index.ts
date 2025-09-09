@@ -21,6 +21,12 @@ class IpcHandler {
       const response = await this.database.sync()
       console.log(response);
       return response;
+    }),
+
+    ipcMain.handle('add-notebook', async(_event, data) => {
+      const {name, notebookName } = data;
+      const response = await this.database.createNotebook(name, notebookName)
+      return response;
     })
   }
 }
