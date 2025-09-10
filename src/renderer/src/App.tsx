@@ -8,6 +8,7 @@ import {
 } from 'react-resizable-panels'
 
 import { useRef,  useState } from 'react'
+import NoteList from './tabs/notesList'
 
 function App(){
 
@@ -38,6 +39,17 @@ function App(){
 
         <PanelResizeHandle/>
 
+        <Panel
+        minSize={0}
+        maxSize={30}
+        defaultSize={24}
+        className = {true ? `min-w-[200px]` : ''}
+        >
+          <NoteList/>
+        </Panel>
+
+        <PanelResizeHandle/>
+        
         <Panel minSize={30} defaultSize={63}>
           <Editor/>
         </Panel>
