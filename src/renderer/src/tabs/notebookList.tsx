@@ -1,13 +1,13 @@
-import { FormEventHandler, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import {USER, Notebook} from "../../../utils/types"
 import {
   NotebookText,
   NotepadText,
   PlusCircle,
   Pin,
-  ChevronRightCircleIcon,
 } from "lucide-react";
 import React from "react";
+import { useAppDispatch, useAppSelector } from "@renderer/redux/hooks";
 /**
  * First query the notebooks with parent notebook equal to null
  * when we click any notebook that it will select it as the parent notebook
@@ -19,6 +19,8 @@ import React from "react";
  */
 
 const NotebookList = () => {
+
+  const dispatch = useAppDispatch();
 
   const [selectedNotebook, setSelectedNotebook] = useState<string>("")
   const [isFormOpen, setFormOpen] = useState(false)
@@ -35,6 +37,10 @@ const NotebookList = () => {
     fetch()
 
   }, [])
+
+  const chooseNotebook = (name: string, id) => {
+    dispatch()
+  }
 
   const addNotebook = async (name: string, parentNotebook: string | null) => {
     const response = await window.api.addNotebook(name, parentNotebook);
