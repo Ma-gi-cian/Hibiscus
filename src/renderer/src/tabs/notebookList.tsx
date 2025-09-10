@@ -1,5 +1,5 @@
 import { FormEventHandler, useEffect, useState } from "react";
-import {USER} from "../../../utils/types"
+import {USER, Notebook} from "../../../utils/types"
 import {
   NotebookText,
   NotepadText,
@@ -23,11 +23,14 @@ const NotebookList = () => {
   const [selectedNotebook, setSelectedNotebook] = useState<string>("")
   const [isFormOpen, setFormOpen] = useState(false)
   const [userData, setUserData] = useState<USER>()
+  const [rootNotebooks, setRootNotebooks] = useState<Notebook[]>([]);
 
   useEffect(() => {
     const fetch = async() => {
-      const response = await window.api.sync();
-      setUserData(response)
+      const userDataResponse= await window.api.sync();
+      const rootNotebooks = await window.api.getRootNotebooks();
+      setUserData(userDataResponse)
+      setRootNotebooks(rootNotebooks.docs)
     }
     fetch()
 
@@ -37,6 +40,9 @@ const NotebookList = () => {
     const response = await window.api.addNotebook(name, parentNotebook);
     if ( response ) {
       console.log("Created")
+      const rootNotebooks = await window.api.getRootNotebooks();
+      setRootNotebooks(rootNotebooks.docs);
+      setFormOpen(false);
     } else {
       console.error("Failed to create it ")
     }
@@ -50,6 +56,8 @@ const NotebookList = () => {
       console.error("Failed to create the notebook")
     }
   }
+
+  console.log(rootNotebooks)
 
   return (
     <div className="w-full  border-r-[0.4px] flex items-center justify-center flex-col border-gray-300 h-screen tracking-wider text-slate-800">
@@ -74,17 +82,14 @@ const NotebookList = () => {
             <PlusCircle className = "w-4 h-4"/>
           </button>
         </span>
-        <ul className = "font-serif space-y-2  flex flex-col">
+        <ul className = "font-serif space-y-1  flex flex-col">
 
           <form   className = { isFormOpen ? `w-full border-[0.3px] border-black ` : `hidden`} onSubmit={handleNotebookFormSubmit}>
             <input placeholder="Notebook Name..." className = { `px-2 py-1 w-full`} />
             <button className = "hidden" type="submit">Submit</button>
           </form>
           {/** when the button is clicked then we select this notebook and then get the data  */}
-          <button className = "ml-8 flex items-center justify-between">
-            <p>Mathematics</p>
-            <ChevronRightCircleIcon className = "w-4 h-4 font-extralight" />
-          </button>
+          {rootNotebooks.length == 0 ? <p></p> :  rootNotebooks.map((d, index) => (<button key = {index} onClick = {() => {setSelectedNotebook(d.name)}} className="pl-8 text-left">{d.name}</button>))}
         </ul>
       </div>
 

@@ -27,6 +27,12 @@ class IpcHandler {
       const {name, notebookName } = data;
       const response = await this.database.createNotebook(name, notebookName)
       return response;
+    }),
+
+    ipcMain.handle('getRootNotebooks', async() => {
+      const response = await this.database.getRootNotebooks();
+      console.log({"RootNotebooks" : response});
+      return response;
     })
   }
 }

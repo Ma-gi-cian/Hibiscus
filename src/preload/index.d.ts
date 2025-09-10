@@ -9,6 +9,7 @@ declare global {
       talk: () => Promise<string>;
       sync : () => Promise<USER>;
       addNotebook : (name: string, parentNotebook: string | null) => Promise<boolean>;
+      getRootNotebooks: () => Promise<any>;
     }
   }
 }

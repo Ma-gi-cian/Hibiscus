@@ -23,6 +23,11 @@ const api = {
   addNotebook: async(name, parentNotebook) => {
     const response = await ipcRenderer.invoke('add-notebook', {name, parentNotebook});
     return response;
+  },
+
+  getRootNotebooks: async() => {
+    const response = await ipcRenderer.invoke('getRootNotebooks');
+    return response
   }
 }
 

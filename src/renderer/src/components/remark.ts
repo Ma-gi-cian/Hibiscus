@@ -6,6 +6,7 @@ import { bracketMatching } from '@codemirror/language'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkFrontmatter from 'remark-frontmatter'
+import remarkImages from 'remark-images'
 
 interface Position {
   line: number;
@@ -37,6 +38,7 @@ interface DecorationInfo {
 const processor = remark()
   .use(remarkGfm)
   .use(remarkFrontmatter, ['yaml', 'toml'])
+  .use(remarkImages)
 
 const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
   decorations: any
@@ -58,22 +60,22 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
 
     try {
       const tree = processor.parse(text) as RemarkNode
-      
+
       // Collect all decorations first
       const decorations: DecorationInfo[] = []
       this.collectDecorations(tree, text, decorations)
-      
+
       // Sort decorations by position
       decorations.sort((a, b) => {
         if (a.from !== b.from) return a.from - b.from
         return a.to - b.to
       })
-      
+
       // Add decorations in sorted order
       for (const dec of decorations) {
         builder.add(dec.from, dec.to, dec.decoration)
       }
-      
+
       return builder.finish()
     } catch (error) {
       console.warn('Remark parsing error:', error)
@@ -133,7 +135,7 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
           to: end,
           decoration: Decoration.mark({ class: `cm-header cm-header-${depth}` })
         })
-        
+
         // Handle # markers
         const headerStart = fullText.indexOf('#'.repeat(depth), start)
         if (headerStart !== -1 && headerStart < end) {
@@ -160,13 +162,13 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
           to: end,
           decoration: Decoration.mark({ class: 'cm-code-block' })
         })
-        
+
         // Handle ``` markers more carefully
         const snippet = fullText.slice(start, end)
         const codeBlockStart = snippet.indexOf('```')
         const codeBlockEnd = snippet.lastIndexOf('```')
         console.log(node.textContent)
-        
+
         if (codeBlockStart !== -1 && codeBlockStart !== codeBlockEnd) {
           decorations.push({
             from: start + codeBlockStart,
@@ -193,7 +195,7 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
         decorations.push({
           from: start,
           to: end,
-          decoration: Decoration.mark({ class: 'cm-image' })
+          decoration: Decoration.mark({ class: 'cm-image' }),
         })
         break
 
@@ -203,7 +205,7 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
           to: end,
           decoration: Decoration.mark({ class: 'cm-blockquote' })
         })
-        
+
         // Handle > markers more carefully
         const lines = fullText.slice(start, end).split('\n')
         let currentPos = start
@@ -281,7 +283,7 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
   addFormattingMarkers(decorations: DecorationInfo[], text: string, start: number, end: number, marker: string): void {
     const markerLen = marker.length
     const snippet = text.slice(start, end)
-    
+
     if (snippet.startsWith(marker) && snippet.endsWith(marker) && start + markerLen < end - markerLen) {
       // Start marker
       decorations.push({
@@ -289,7 +291,7 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
         to: start + markerLen,
         decoration: Decoration.mark({ class: 'cm-formatting' })
       })
-      
+
       // End marker
       decorations.push({
         from: end - markerLen,
@@ -302,11 +304,11 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
   getOffset(position: Position, text: string): number {
     const lines = text.split('\n')
     let offset = 0
-    
+
     for (let i = 0; i < Math.min(position.line - 1, lines.length); i++) {
       offset += lines[i].length + 1 // +1 for newline
     }
-    
+
     return offset + Math.max(0, position.column - 1)
   }
 }, {
@@ -320,17 +322,17 @@ const enhancedTheme = EditorView.theme({
   '.cm-strikethrough': { textDecoration: 'line-through' },
 
   '.cm-text': {
-    fontWeight: 'semibold', 
+    fontWeight: 'semibold',
     fontFamily: 'ui-monospace, SFMono-Regular, "SF mono"',
     letterSpacing: '0.08em',
-    fontSize: '1.07em' 
-  }, 
+    fontSize: '1.07em'
+  },
   '.cm-formatting': {
     opacity: '0.4',
     fontSize: '0.9em',
     color: '#6b7280',
   },
-  
+
   '.cm-header': {
     fontWeight: 'bold',
     lineHeight: '1.4',
@@ -343,7 +345,7 @@ const enhancedTheme = EditorView.theme({
   '.cm-header-4': { fontSize: '1.1em', color: '#6b7280' },
   '.cm-header-5': { fontSize: '1em', color: '#9ca3af' },
   '.cm-header-6': { fontSize: '0.9em', color: '#d1d5db' },
-  
+
   '.cm-inline-code': {
     backgroundColor: '#f1f1f1',
     padding: '2px 4px',
@@ -351,7 +353,7 @@ const enhancedTheme = EditorView.theme({
     fontSize: '0.85em',
     color: '#c7254e',
   },
-  
+
   '.cm-code-block': {
     padding: '12px 16px',
     fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
@@ -360,25 +362,25 @@ const enhancedTheme = EditorView.theme({
     color: '#333',
     margin: '10px 0',
   },
-  
+
   '.cm-link': {
     color: '#2563eb',
     textDecoration: 'underline',
     textUnderlineOffset: '2px',
   },
-  
+
   '.cm-image': {
     color: '#059669',
     fontWeight: '500',
   },
-  
+
   '.cm-blockquote': {
     borderLeft: '4px solid #e5e7eb',
     paddingLeft: '16px',
     color: '#6b7280',
     fontStyle: 'italic',
   },
-  
+
   '.cm-list': {
     paddingLeft: '20px',
     marginTop: '8px',
@@ -386,12 +388,12 @@ const enhancedTheme = EditorView.theme({
     padding: '8px 16px',
     lineHeight: '1.6',
   },
-  
+
   '.cm-table': {
     borderCollapse: 'collapse',
     width: '100%',
   },
-  
+
   '.cm-frontmatter': {
     backgroundColor: '#f1f5f9',
     border: '1px solid #cbd5e1',
@@ -400,7 +402,7 @@ const enhancedTheme = EditorView.theme({
     fontSize: '0.875em',
     color: '#475569',
   },
-  
+
   '.cm-cursor': {
     borderLeft: '4px solid #1f2937 !important',
     zIndex: '1000 !important',
@@ -409,7 +411,7 @@ const enhancedTheme = EditorView.theme({
   '.cm-editor.cm-focused': {
     outline: 'none !important'
   },
-  
+
   '.cm-focused .cm-cursor': {
     borderLeftColor: '#2563eb !important',
   }
@@ -425,15 +427,15 @@ export function enhancedRemarkMarkdown() {
       ...searchKeymap,
     ]),
     bracketMatching(),
-    
+
     // Custom markdown highlighting
     enhancedRemarkHighlighter,
     enhancedTheme,
-    
+
     // Basic editor configuration
     EditorView.lineWrapping,
     EditorState.allowMultipleSelections.of(true),
-    
+
     // Editor styling
     EditorView.theme({
       '&': {
