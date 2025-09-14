@@ -29,7 +29,7 @@ export interface Note {
     numOfTasks: number;
     numOfCheckedTasks: number;
     pinned: boolean;
-    status?: 'working' | 'draft' | 'done' | 'priority' | 'abondened';
+    status: 'working' | 'draft' | 'done' | 'priority' ;
     tags: string[];
     type: 'note'
 }

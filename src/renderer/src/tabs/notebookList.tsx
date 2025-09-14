@@ -1,4 +1,4 @@
-import {  useEffect, useState } from "react";
+import {  useEffect, useRef, useState } from "react";
 import {USER, Notebook} from "../../../utils/types"
 import {
   NotebookText,
@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@renderer/redux/hooks";
+import {setNotebookDetails} from "@renderer/redux/features/NotesHandler/notes"
 /**
  * First query the notebooks with parent notebook equal to null
  * when we click any notebook that it will select it as the parent notebook
@@ -22,6 +23,7 @@ const NotebookList = () => {
 
   const dispatch = useAppDispatch();
 
+  const inputRef = useRef<HTMLInputElement>(null)
   const [selectedNotebook, setSelectedNotebook] = useState<string>("")
   const [isFormOpen, setFormOpen] = useState(false)
   const [userData, setUserData] = useState<USER>()
@@ -38,8 +40,14 @@ const NotebookList = () => {
 
   }, [])
 
-  const chooseNotebook = (name: string, id) => {
-    dispatch()
+  useEffect(() => {
+    if(isFormOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isFormOpen])
+
+  const chooseNotebook = (name: string, id: string) => {
+    dispatch(setNotebookDetails({name, id}))
   }
 
   const addNotebook = async (name: string, parentNotebook: string | null) => {
@@ -54,6 +62,7 @@ const NotebookList = () => {
     }
   }
 
+
   const handleNotebookFormSubmit = (e : React.FormEvent<HTMLFormElement>) => {
     const notebookName = e.target[0].value;
     if(notebookName != "") {
@@ -62,8 +71,6 @@ const NotebookList = () => {
       console.error("Failed to create the notebook")
     }
   }
-
-  console.log(rootNotebooks)
 
   return (
     <div className="w-full  border-r-[0.4px] flex items-center justify-center flex-col border-gray-300 h-screen tracking-wider text-slate-800">
@@ -89,13 +96,12 @@ const NotebookList = () => {
           </button>
         </span>
         <ul className = "font-serif space-y-1  flex flex-col">
-
           <form   className = { isFormOpen ? `w-full border-[0.3px] border-black ` : `hidden`} onSubmit={handleNotebookFormSubmit}>
-            <input placeholder="Notebook Name..." className = { `px-2 py-1 w-full`} />
+            <input ref={inputRef}  placeholder="Notebook Name..." className = { `px-2 py-1 w-full`} />
             <button className = "hidden" type="submit">Submit</button>
           </form>
           {/** when the button is clicked then we select this notebook and then get the data  */}
-          {rootNotebooks.length == 0 ? <p></p> :  rootNotebooks.map((d, index) => (<button key = {index} onClick = {() => {setSelectedNotebook(d.name)}} className="pl-8 text-left">{d.name}</button>))}
+          {rootNotebooks.length == 0 ? <p></p> :  rootNotebooks.map((d, index) => (<button key = {index} onClick = {() => {chooseNotebook(d.name, d._id)}} className="pl-8 text-left cursor-pointer">{d.name}</button>))}
         </ul>
       </div>
 
