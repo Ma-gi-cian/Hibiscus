@@ -1,8 +1,8 @@
-# Roselle
+# Hibiscus
 
 ![Current Look](images/Basic_look.png)
 
-**Roselle** is a simple, personal markdown editor built using **Electron**, **React**, and **Vite**. It is inspired by editors like [Marktext](https://marktext.cc) and [Inkdrop](https://inkdrop.app).
+**Hibiscus** is a simple, personal markdown editor built using **Electron**, **React**, and **Vite**. It is inspired by editors like [Marktext](https://marktext.cc) and [Inkdrop](https://inkdrop.app).
 
 >[!Caution]
 > This is a learning project and is not intended for production use.
@@ -35,8 +35,8 @@ This feature is intended to makr interactive technical writing much easier - tut
 1. Fork and Install
 
     ```bash
-    git clone https://github.com/your-user-name/roselle.git
-    cd roselle
+    git clone https://github.com/your-user-name/Hibiscus.git
+    cd Hibiscus
     npm install
     ```
 
