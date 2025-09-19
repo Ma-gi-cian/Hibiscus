@@ -1,6 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { USER } from '../utils/types';
 
 /**
  * `on` => one way messgae handler, the main can reply but will need to use event.reply() and it is not asynchronous
@@ -28,6 +27,21 @@ const api = {
   getRootNotebooks: async() => {
     const response = await ipcRenderer.invoke('getRootNotebooks');
     return response
+  },
+
+  getNotes: async(notebookId: string) => {
+    const response = await ipcRenderer.invoke('getNotes', notebookId);
+    return response
+  },
+
+  createNote : async(notebookId: string) => {
+    const response = await ipcRenderer.invoke('createNote', notebookId);
+    return response;
+  },
+
+  getNoteData: async(noteId : string) => {
+    const response = await ipcRenderer.invoke('getNote', noteId);
+    return response;
   }
 }
 
@@ -41,9 +55,4 @@ if (process.contextIsolated) {
   } catch (error) {
     console.error(error)
   }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
 }

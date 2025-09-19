@@ -56,7 +56,7 @@ class DatabaseManager {
   }
 
   public async sync(): Promise<USER> {
-    let previous_sync = await this.db?.get('default:user')
+    const previous_sync = await this.db?.get('default:user')
     await this.db?.put({ ...previous_sync, syncedOn: new Date() })
     const new_sync = await this.db?.get<USER>('default:user')
     console.log('This is syncing')
@@ -76,7 +76,7 @@ class DatabaseManager {
     numOfCheckedTasks: number = 0,
     status: 'working' | 'draft' | 'done' | 'priority' = 'working',
     createdAt?: Date
-  ): Promise<boolean | undefined> {
+  ): Promise<Note | boolean> {
     let note: Note
     const now = new Date()
 
@@ -124,7 +124,7 @@ class DatabaseManager {
     try {
       const response = await this.db.put(note)
       console.log('Database response:', response)
-      return response?.ok
+      return note
     } catch (error) {
       console.error('Error saving note:', error)
       return false
@@ -136,9 +136,9 @@ class DatabaseManager {
     parentBookId: string | null = null
   ): Promise<boolean | undefined> {
     if (name != '') {
-      let _id = `book:${uuidv4()}`
+      const _id = `book:${uuidv4()}`
       console.log('Notebook Creation :', name)
-      let createdAt = new Date()
+      const createdAt = new Date()
       try {
         const update_response = await this.db?.put<Notebook>({
           _id: _id,
@@ -208,6 +208,12 @@ class DatabaseManager {
     } catch (error) {
       console.error('ERROR:', error)
     }
+  }
+
+  public async getNoteData(id: string) {
+    const document = await this.db?.get(id);
+    console.log(document);
+    return document
   }
 }
 

@@ -1,17 +1,29 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { Note } from 'src/utils/types';
 import { basicExtensions } from '../components/EditorExtensions';
 import { EditorView } from "@codemirror/view";
 import { ChevronsLeftRightIcon} from 'lucide-react'
+import { useAppSelector, useAppDispatch } from '@renderer/redux/hooks';
 
 const Editor = () => {
-
+  const {notebookName, notebookId, note_open_id, currentNote} = useAppSelector((state) => state.notesHandler)
+  const dispatch = useAppDispatch()
   const editorRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
 
   useEffect(() => {
+    const noteData = async(id: string) => {
+      const response = await window.api.getNoteData(id);
+      console.log(response);
+    }
+
+    if (note_open_id != null) {
+      noteData(note_open_id);
+    }
+
     if(editorRef.current && !viewRef.current) {
       viewRef.current = new EditorView({
-        doc: "# Signals and Systems \n There are two kinds of signals **continuous** and **discrete**",
+        doc: currentNote.body,
         parent: editorRef.current,
         extensions: [
           basicExtensions
@@ -25,10 +37,8 @@ const Editor = () => {
         viewRef.current = null;
       }
     }
-  },[])
+  },[note_open_id, currentNote])
 
-
-    // editorRef.current?.focus()
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if ( event.code == "Enter" && viewRef.current) {
@@ -60,21 +70,22 @@ const Editor = () => {
             <ChevronsLeftRightIcon className="w-4 h-4 text-gray-600"/>
           </button>
 
-          <input
+          {note_open_id ? <input
             style={{WebkitAppRegion: 'no-drag'}}
             className="flex bg-transparent text-gray-900 text-2xl w-1/2 font-semibold border-none outline-none placeholder-gray-400 focus:placeholder-gray-300 transition-colors duration-200"
-            placeholder="Untitled"
+            value={currentNote.title}
             onKeyDown={handleKeyDown}
-          />
+          /> : <p></p>}
+
         </div>
       </div>
 
-      <div
+      {note_open_id ? <div
         className="w-full h-screen overflow-y-auto text-black bg-blue-300"
         style={containerStyle}
         ref={editorRef}
       >
-      </div>
+      </div> : <div className = "w-full, h-screen flex items-center justify-center text-xl font-serif overflow-y-auto text-black bg-blue-300" style={containerStyle}>Please Select a note from a Notebook</div>}
     </div>
   )
 }

@@ -1,15 +1,31 @@
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { Note } from "src/utils/types";
 
 export interface NoteState  {
   notebookName : string;
   notebookId : string;
   note_open_id: string | null;
+  currentNote : Note
 }
 
 const initialData : NoteState = {
   notebookName: "",
   notebookId : "",
-  note_open_id: null
+  note_open_id: null,
+  currentNote: {
+    _id: "",
+    title: "",
+    body: "",
+    bookId: "",
+    createdAt: new Date(Date.now()),
+    modifiedAt: new Date(Date.now()),
+    numOfTasks: 0,
+    numOfCheckedTasks: 0,
+    pinned: false,
+    status: "done",
+    tags: [],
+    type: "note"
+  }
 }
 
 const notesHandler  = createSlice({
@@ -26,6 +42,10 @@ const notesHandler  = createSlice({
     setNoteOpenDetails: (state, action: PayloadAction<{id : string }>) => {
       const { id } = action.payload;
       state.note_open_id = id;
+    },
+
+    setCurrentNote : (state, action: PayloadAction<Note>) => {
+      state.currentNote = action.payload;
     }
   }
 })

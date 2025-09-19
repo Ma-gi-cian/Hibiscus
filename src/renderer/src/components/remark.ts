@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-case-declarations */
 import { EditorView, Decoration, ViewPlugin, keymap } from '@codemirror/view'
 import { RangeSetBuilder, EditorState } from '@codemirror/state'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
@@ -63,16 +65,24 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
 
       // Collect all decorations first
       const decorations: DecorationInfo[] = []
+
+      // First, collect complete markdown elements from remark
       this.collectDecorations(tree, text, decorations)
 
+      // Then, collect partial/incomplete elements
+      this.collectPartialDecorations(text, decorations)
+
+      // Remove overlapping decorations (complete takes priority over partial)
+      const filteredDecorations = this.removeOverlaps(decorations)
+
       // Sort decorations by position
-      decorations.sort((a, b) => {
+      filteredDecorations.sort((a, b) => {
         if (a.from !== b.from) return a.from - b.from
         return a.to - b.to
       })
 
       // Add decorations in sorted order
-      for (const dec of decorations) {
+      for (const dec of filteredDecorations) {
         builder.add(dec.from, dec.to, dec.decoration)
       }
 
@@ -113,9 +123,9 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
 
       case 'text':
         decorations.push({
-          from:start,
-          to:end,
-          decoration: Decoration.mark({class: 'cm-text'})
+          from: start,
+          to: end,
+          decoration: Decoration.mark({ class: 'cm-text' })
         })
         break;
 
@@ -163,11 +173,10 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
           decoration: Decoration.mark({ class: 'cm-code-block' })
         })
 
-        // Handle ``` markers more carefully
+        // Handle ```
         const snippet = fullText.slice(start, end)
         const codeBlockStart = snippet.indexOf('```')
         const codeBlockEnd = snippet.lastIndexOf('```')
-        console.log(node.textContent)
 
         if (codeBlockStart !== -1 && codeBlockStart !== codeBlockEnd) {
           decorations.push({
@@ -237,7 +246,7 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
         decorations.push({
           from: start,
           to: end,
-          decoration: Decoration.mark({class: 'cm-list'})
+          decoration: Decoration.mark({ class: 'cm-list' })
         })
         break;
 
@@ -245,8 +254,8 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
         const itemText = fullText.slice(start, end)
         const bulletMatch = itemText.match(/^(\s*)([-*+]|\d+\.)\s/)
         if (bulletMatch) {
-          const markerStart = start + bulletMatch[1].length
-          const markerEnd = markerStart + bulletMatch[2].length
+          const markerStart = start + bulletMatch.length[1]
+          const markerEnd = markerStart + bulletMatch.length[2]
           if (markerStart < markerEnd && markerEnd <= end) {
             decorations.push({
               from: markerStart,
@@ -278,6 +287,130 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
     if (node.children) {
       node.children.forEach(child => this.collectDecorations(child, fullText, decorations))
     }
+  }
+
+  // NEW METHOD: Collect partial/incomplete markdown elements
+  collectPartialDecorations(text: string, decorations: DecorationInfo[]): void {
+    const lines = text.split('\n')
+    let currentOffset = 0
+
+    lines.forEach((line, lineIndex) => {
+      // Check for partial bold (**text without closing **)
+      let match
+      const boldRegex = /\*\*(?![^*]*\*\*)/g
+      while ((match = boldRegex.exec(line)) !== null) {
+        const markerStart = currentOffset + match.index
+        const markerEnd = markerStart + 2
+        const lineEnd = currentOffset + line.length
+
+        // Style the ** marker
+        decorations.push({
+          from: markerStart,
+          to: markerEnd,
+          decoration: Decoration.mark({ class: 'cm-formatting cm-partial-formatting' })
+        })
+
+        // Style the text following the marker until end of line
+        if (markerEnd < lineEnd) {
+          decorations.push({
+            from: markerEnd,
+            to: lineEnd,
+            decoration: Decoration.mark({ class: 'cm-strong cm-partial-strong' })
+          })
+        }
+      }
+
+      // Check for partial italic (*text without closing *)
+      // More complex regex to avoid matching ** patterns
+      const italicRegex = /(?<!\*)\*(?!\*)(?![^*]*\*(?!\*))/g
+      while ((match = italicRegex.exec(line)) !== null) {
+        const markerStart = currentOffset + match.index
+        const markerEnd = markerStart + 1
+        const lineEnd = currentOffset + line.length
+
+        decorations.push({
+          from: markerStart,
+          to: markerEnd,
+          decoration: Decoration.mark({ class: 'cm-formatting cm-partial-formatting' })
+        })
+
+        if (markerEnd < lineEnd) {
+          decorations.push({
+            from: markerEnd,
+            to: lineEnd,
+            decoration: Decoration.mark({ class: 'cm-emphasis cm-partial-emphasis' })
+          })
+        }
+      }
+
+      // Check for partial strikethrough (~~text without closing ~~)
+      const strikeRegex = /~~(?![^~]*~~)/g
+      while ((match = strikeRegex.exec(line)) !== null) {
+        const markerStart = currentOffset + match.index
+        const markerEnd = markerStart + 2
+        const lineEnd = currentOffset + line.length
+
+        decorations.push({
+          from: markerStart,
+          to: markerEnd,
+          decoration: Decoration.mark({ class: 'cm-formatting cm-partial-formatting' })
+        })
+
+        if (markerEnd < lineEnd) {
+          decorations.push({
+            from: markerEnd,
+            to: lineEnd,
+            decoration: Decoration.mark({ class: 'cm-strikethrough cm-partial-strikethrough' })
+          })
+        }
+      }
+
+      // Check for partial inline code (`text without closing `)
+      const codeRegex = /`(?![^`]*`)/g
+      while ((match = codeRegex.exec(line)) !== null) {
+        const markerStart = currentOffset + match.index
+        const markerEnd = markerStart + 1
+        const lineEnd = currentOffset + line.length
+
+        decorations.push({
+          from: markerStart,
+          to: markerEnd,
+          decoration: Decoration.mark({ class: 'cm-formatting cm-partial-formatting' })
+        })
+
+        if (markerEnd < lineEnd) {
+          decorations.push({
+            from: markerEnd,
+            to: lineEnd,
+            decoration: Decoration.mark({ class: 'cm-inline-code cm-partial-code' })
+          })
+        }
+      }
+
+      currentOffset += line.length + 1 // +1 for newline
+    })
+  }
+
+  // NEW METHOD: Remove overlapping decorations (complete takes priority over partial)
+  removeOverlaps(decorations: DecorationInfo[]): DecorationInfo[] {
+    const complete = decorations.filter(d =>
+      !d.decoration.spec.class?.includes('partial')
+    )
+    const partial = decorations.filter(d =>
+      d.decoration.spec.class?.includes('partial')
+    )
+
+    // Remove partial decorations that overlap with complete ones
+    const filtered = partial.filter(partialDec => {
+      return !complete.some(completeDec =>
+        // Check if partial decoration overlaps with complete one
+        (partialDec.from >= completeDec.from && partialDec.from < completeDec.to) ||
+        (partialDec.to > completeDec.from && partialDec.to <= completeDec.to) ||
+        (partialDec.from <= completeDec.from && partialDec.to >= completeDec.to)
+      )
+    })
+
+    return [...complete, ...filtered]
   }
 
   addFormattingMarkers(decorations: DecorationInfo[], text: string, start: number, end: number, marker: string): void {
@@ -315,7 +448,7 @@ const enhancedRemarkHighlighter = ViewPlugin.fromClass(class {
   decorations: (v: any) => v.decorations
 })
 
-// Enhanced theme (same as before)
+// Enhanced theme with partial formatting styles
 const enhancedTheme = EditorView.theme({
   '.cm-strong': { fontWeight: 'bold' },
   '.cm-emphasis': { fontStyle: 'italic' },
@@ -327,10 +460,42 @@ const enhancedTheme = EditorView.theme({
     letterSpacing: '0.08em',
     fontSize: '1.07em'
   },
+
   '.cm-formatting': {
     opacity: '0.4',
     fontSize: '0.9em',
     color: '#6b7280',
+  },
+
+  // NEW: Partial formatting styles
+  '.cm-partial-formatting': {
+    opacity: '0.6',
+    color: '#2563eb',
+    fontSize: '0.9em',
+  },
+
+  '.cm-partial-strong': {
+    fontWeight: 'bold',
+    backgroundColor: 'rgba(37, 99, 235, 0.05)',
+  },
+
+  '.cm-partial-emphasis': {
+    fontStyle: 'italic',
+    backgroundColor: 'rgba(34, 197, 94, 0.05)',
+  },
+
+  '.cm-partial-strikethrough': {
+    textDecoration: 'line-through',
+    backgroundColor: 'rgba(239, 68, 68, 0.05)',
+  },
+
+  '.cm-partial-code': {
+    backgroundColor: '#f1f1f1',
+    padding: '2px 4px',
+    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+    fontSize: '0.85em',
+    color: '#c7254e',
+    opacity: '0.8',
   },
 
   '.cm-header': {

@@ -9,6 +9,10 @@
     "src/utils/**/*"
   ],
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "typeRoots": ["./types", "./node_modules/@types"],
     "composite": true,
     "jsx": "react-jsx",

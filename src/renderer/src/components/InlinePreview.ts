@@ -4,7 +4,7 @@ import { syntaxTree } from '@codemirror/language';
 import { type SyntaxNode } from '@lezer/common';
 import MarkdownWidget, { type MarkdownWidgetType} from './MarkdownWidget';
 
-interface NodeTypeMapping { 
+interface NodeTypeMapping {
     [key: string] : {
         type: MarkdownWidgetType;
         level?: number;
@@ -13,7 +13,7 @@ interface NodeTypeMapping {
 
 const NODE_TYPE_MAPPING : NodeTypeMapping = {
     'ATXHeading1' : {type: 'heading', level: 1},
-    'ATXHeading2' : { type: 'heading', level: 2}, 
+    'ATXHeading2' : { type: 'heading', level: 2},
     'ATXHeading3' : {type: 'heading', level: 3},
     'StrongEmphasis' : {type : 'bold'},
     'Emphasis' : { type : 'italic' },
